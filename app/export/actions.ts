@@ -21,7 +21,13 @@ export async function runExport(input: {
   const res = await buildExport(input);
 
   if (!res.ok || !res.bytes) {
-    return { ok: false, error: res.error, warnings: res.warnings, fileName: "", base64: "" };
+    return {
+      ok: false,
+      error: res.error,
+      warnings: res.warnings,
+      fileName: "",
+      base64: "",
+    };
   }
 
   // A Uint8Array-t darabokban alakítjuk base64-re, mert a String.fromCharCode(...)

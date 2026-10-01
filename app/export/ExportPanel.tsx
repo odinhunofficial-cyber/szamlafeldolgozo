@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { runExport } from "./actions";
-import { EXPORTABLE_FIELDS } from "@/lib/export/build";
+import { EXPORTABLE_FIELDS } from "@/lib/export/profile";
 import { createClient } from "@/lib/supabase/client";
 
 interface Company {
@@ -56,22 +56,29 @@ export function ExportPanel({
   const [warnings, setWarnings] = useState<string[]>([]);
   const [ok, setOk] = useState<string | null>(null);
 
-  // Új profil űrlapja
   const [showForm, setShowForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newFormat, setNewFormat] = useState<"csv" | "xlsx">("csv");
   const [newDelimiter, setNewDelimiter] = useState(";");
   const [newDecimal, setNewDecimal] = useState(",");
   const [newDateFormat, setNewDateFormat] = useState("YYYY-MM-DD");
-  const [newEncoding, setNewEncoding] = useState<"utf-8" | "windows-1250" | "iso-8859-2">("utf-8");
-  const [newFields, setNewFields] = useState<string[]>(["invoice_number", "issue_date", "gross_amount"]);
+  const [newEncoding, setNewEncoding] = useState<
+    "utf-8" | "windows-1250" | "iso-8859-2"
+  >("utf-8");
+  const [newFields, setNewFields] = useState<string[]>([
+    "invoice_number",
+    "issue_date",
+    "gross_amount",
+  ]);
 
   const supabase = createClient();
 
   async function loadProfiles(cid: string) {
     const { data } = await supabase
       .from("export_profiles")
-      .select("id, name, format, delimiter, decimal_separator, date_format, encoding, column_mapping")
+      .select(
+        "id, name, format, delimiter, decimal_separator, date_format, encoding, column_mapping"
+      )
       .eq("company_id", cid)
       .order("created_at", { ascending: true });
 
@@ -103,7 +110,6 @@ export function ExportPanel({
 
       setWarnings(res.warnings);
 
-      // A base64-et bájtokká alakítjuk, és közvetlenül letöltjük.
       const binary = atob(res.base64);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
@@ -229,12 +235,22 @@ export function ExportPanel({
 
           <div>
             <label htmlFor="ef">Kezdő dátum (opcionális)</label>
-            <input id="ef" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <input
+              id="ef"
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
           </div>
 
           <div>
             <label htmlFor="et">Záró dátum (opcionális)</label>
-            <input id="et" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <input
+              id="et"
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+            />
           </div>
 
           <div style={{ flex: "0 0 auto" }}>
@@ -255,8 +271,8 @@ export function ExportPanel({
         <div className="card">
           <h2>Új exportprofil</h2>
           <p className="small muted">
-            A profil a könyvelőprogram elvárt formátumát írja le: oszlopok, sorrend,
-            elválasztó, tizedesjel, dátumformátum és kódolás.
+            A profil a könyvelőprogram elvárt formátumát írja le: oszlopok,
+            sorrend, elválasztó, tizedesjel, dátumformátum és kódolás.
           </p>
 
           {!showForm ? (
@@ -278,17 +294,26 @@ export function ExportPanel({
                 </div>
                 <div>
                   <label htmlFor="pf">Formátum</label>
-                  <select id="pf" value={newFormat} onChange={(e) => setNewFormat(e.target.value as "csv" | "xlsx")}>
+                  <select
+                    id="pf"
+                    value={newFormat}
+                    onChange={(e) =>
+                      setNewFormat(e.target.value as "csv" | "xlsx")
+                    }
+                  >
                     <option value="csv">CSV</option>
                     <option value="xlsx">Excel (XLSX)</option>
                   </select>
                 </div>
                 <div>
                   <label htmlFor="pd">Elválasztó</label>
-                  <select id="pd" value={newDelimiter} onChange={(e) => setNewDelimiter(e.target.value)}>
+                  <select
+                    id="pd"
+                    value={newDelimiter}
+                    onChange={(e) => setNewDelimiter(e.target.value)}
+                  >
                     <option value=";">pontosvessző (;)</option>
                     <option value=",">vessző (,)</option>
-                    <option value="\t">tab</option>
                     <option value="|">pipe (|)</option>
                   </select>
                 </div>
@@ -297,14 +322,22 @@ export function ExportPanel({
               <div className="row">
                 <div>
                   <label htmlFor="pdec">Tizedesjel</label>
-                  <select id="pdec" value={newDecimal} onChange={(e) => setNewDecimal(e.target.value)}>
+                  <select
+                    id="pdec"
+                    value={newDecimal}
+                    onChange={(e) => setNewDecimal(e.target.value)}
+                  >
                     <option value=",">vessző (,)</option>
                     <option value=".">pont (.)</option>
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="pdf">Dátumformátum</label>
-                  <select id="pdf" value={newDateFormat} onChange={(e) => setNewDateFormat(e.target.value)}>
+                  <label htmlFor="pdt">Dátumformátum</label>
+                  <select
+                    id="pdt"
+                    value={newDateFormat}
+                    onChange={(e) => setNewDateFormat(e.target.value)}
+                  >
                     <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                     <option value="YYYY.MM.DD">YYYY.MM.DD</option>
                     <option value="DD.MM.YYYY">DD.MM.YYYY</option>
@@ -328,7 +361,9 @@ export function ExportPanel({
               </div>
 
               <label>Oszlopok (a kiválasztás sorrendje lesz az oszlopsorrend)</label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
+              <div
+                style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}
+              >
                 {EXPORTABLE_FIELDS.map((f) => (
                   <button
                     key={f}
