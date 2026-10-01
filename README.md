@@ -42,3 +42,12 @@ cp .env.example .env.local
 npm install
 npm run dev
 ```
+
+## Hozzáférés (könyvelő meghívása)
+A cég tulajdonosa a cég oldalán meghívhat egy könyvelőt e-mail-címmel.
+A meghívás a könyvelő bejelentkezésekor lép életbe, és csak megerősített e-mail-címmel váltható be.
+
+## NAV élesítés előtti ellenőrzőlista
+- Teszt környezetben először sikeres `queryInvoiceDigest` lekérdezés.
+- A NAV jelszó, aláírókulcs és adószám csak a beállítási űrlapon legyen megadva.
+- Éles használat előtt kapcsold be a Supabase e-mail-megerősítést.
