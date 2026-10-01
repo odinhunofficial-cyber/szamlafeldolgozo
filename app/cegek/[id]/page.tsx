@@ -3,10 +3,13 @@ import { notFound, redirect } from "next/navigation";
 import { getCompany, getUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { dateHu, directionHu, huf, statusHu } from "@/lib/format";
-import { NavTab, NavTabs } from "./NavTabs";
-import { NavPanel } from "./NavPanel";
+import { NavTab, NavPanel, NavTabs } from "./NavTabs";
+import { CredentialsForm } from "./CredentialsForm";
 import { AccessPanel } from "./AccessPanel";
 import { NavQueryButton } from "./NavQueryButton";
+
+// Futásidőben példányosítjuk a Supabase-klienst — lásd az export oldalt.
+export const dynamic = "force-dynamic";
 
 export default async function CompanyPage({
   params,
@@ -65,7 +68,6 @@ export default async function CompanyPage({
         <NavTab value="szamlak" label="Számlák" />
         <NavTab value="nav" label="NAV-kapcsolat" />
         <NavTab value="hozzaferes" label="Hozzáférés" />
-        <NavTab value="feltoltes" label="Feltöltés" />
       </NavTabs>
 
       <div className="card">
@@ -75,27 +77,31 @@ export default async function CompanyPage({
             hasCredentials={Boolean(credentials)}
             isOwner={isOwner}
           />
+          <CredentialsForm companyId={id} hasCredentials={Boolean(credentials)} />
         </NavPanel>
 
         <NavPanel value="hozzaferes">
           <AccessPanel companyId={id} isOwner={isOwner} />
         </NavPanel>
 
-        <NavPanel value="feltoltes">
-          <p>
-            A feltöltés a <Link href="/feltoltes">Feltöltés</Link> oldalon működik.
+        <NavPanel value="szamlak">
+          <p className="small muted">
+            A számlák lekérdezése a NAV-kapcsolat fülön indul. A feltöltött
+            papírszámlák a Feltöltés oldalon kerülnek be.
           </p>
         </NavPanel>
       </div>
 
-      <div className="card">
-        <h2>Számlák</h2>
+      <h2>Számlák</h2>
 
-        {!invoices || invoices.length === 0 ? (
+      {!invoices || invoices.length === 0 ? (
+        <div className="card">
           <p className="muted">
             Még nincs számla. Kérdezd le a NAV-ból, vagy tölts fel papírszámlát.
           </p>
-        ) : (
+        </div>
+      ) : (
+        <div className="card">
           <table>
             <thead>
               <tr>
@@ -114,7 +120,11 @@ export default async function CompanyPage({
                 <tr key={inv.id}>
                   <td>{dateHu(inv.issue_date)}</td>
                   <td>{directionHu(inv.direction)}</td>
-                  <td>{inv.invoice_number || <span className="muted">–</span>}</td>
+                  <td>
+                    <Link href={"/szamlak/" + inv.id}>
+                      {inv.invoice_number || <span className="muted">–</span>}
+                    </Link>
+                  </td>
                   <td>
                     {inv.direction === "outgoing"
                       ? inv.customer_name || "–"
@@ -137,8 +147,8 @@ export default async function CompanyPage({
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

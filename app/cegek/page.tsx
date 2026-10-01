@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { getCompanies, getUser } from "@/lib/auth";
 import { CompanyForm } from "./CompanyForm";
 
+// Futásidőben példányosítjuk a Supabase-klienst — lásd az export oldalt.
+export const dynamic = "force-dynamic";
+
 export default async function Cegek() {
   const user = await getUser();
   if (!user) redirect("/bejelentkezes");
@@ -13,8 +16,8 @@ export default async function Cegek() {
     <div>
       <h1>Cégek</h1>
       <p className="muted small">
-        A cég az, aminek a számláit kezeled. A létrehozó automatikusan tulajdonos lesz,
-        és a cég oldalán hívhat meg könyvelőt.
+        A cég az, aminek a számláit kezeled. A létrehozó automatikusan tulajdonos
+        lesz, és a cég oldalán hívhat meg könyvelőt.
       </p>
 
       {companies.length === 0 ? (
@@ -43,7 +46,7 @@ export default async function Cegek() {
                     </span>
                   </td>
                   <td className="num">
-                    <Link href={`/cegek/${c.id}`}>Megnyitás</Link>
+                    <Link href={"/cegek/" + c.id}>Megnyitás</Link>
                   </td>
                 </tr>
               ))}

@@ -2,17 +2,28 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
+// A logó: AURUM, ritkított nagybetűvel, arany ponttal — a Nav-ban a .brand osztály adja.
 export function Nav() {
   const [email, setEmail] = useState<string | null>(null);
-  const supabase = createClient();
+  const [ready, setReady] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    // Ha az env-változók hiányoznak, a kliens létrehozása hibát dobna —
+    // ilyenkor a fejléc a bejelentkezés nélküli állapotot mutatja.
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      setReady(true);
+      return;
+    }
+
+    const supabase = createClient();
+
     supabase.auth.getUser().then(({ data }) => {
       setEmail(data.user?.email ?? null);
+      setReady(true);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -23,6 +34,7 @@ export function Nav() {
   }, []);
 
   async function signOut() {
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/bejelentkezes");
     router.refresh();
@@ -32,7 +44,7 @@ export function Nav() {
     <nav className="topbar">
       <div className="inner">
         <Link href="/" className="brand">
-          Számlafeldolgozó
+          Aurum
         </Link>
 
         {email && (
@@ -45,7 +57,7 @@ export function Nav() {
 
         <span className="spacer" />
 
-        {email ? (
+        {ready && email ? (
           <>
             <span className="small muted">{email}</span>
             <button className="secondary" onClick={signOut}>
@@ -53,10 +65,12 @@ export function Nav() {
             </button>
           </>
         ) : (
-          <>
-            <Link href="/bejelentkezes">Bejelentkezés</Link>
-            <Link href="/regisztracio">Regisztráció</Link>
-          </>
+          ready && (
+            <>
+              <Link href="/bejelentkezes">Bejelentkezés</Link>
+              <Link href="/regisztracio">Regisztráció</Link>
+            </>
+          )
         )}
       </div>
     </nav>

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCompanies, getUser } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+
+// A Supabase-klienst futásidőben példányosítjuk, ezért nem lehet statikusan
+// előrenderelni — a build env-változók nélkül is lefut így.
+export const dynamic = "force-dynamic";
+
 import { ExportPanel } from "./ExportPanel";
 
 export default async function ExportPage() {
@@ -24,11 +28,14 @@ export default async function ExportPage() {
   }
 
   const first = companies[0];
+  const { createClient } = await import("@/lib/supabase/server");
   const supabase = await createClient();
 
   const { data: profiles } = await supabase
     .from("export_profiles")
-    .select("id, name, format, delimiter, decimal_separator, date_format, encoding, column_mapping")
+    .select(
+      "id, name, format, delimiter, decimal_separator, date_format, encoding, column_mapping"
+    )
     .eq("company_id", first.id)
     .order("created_at", { ascending: true });
 
@@ -37,8 +44,7 @@ export default async function ExportPage() {
       <h1>Export</h1>
       <p className="muted small">
         Állítható exportprofilok: a könyvelőprogram elvárt oszlopai, sorrendje,
-        elválasztója, tizedesjele, dátumformátuma és kódolása. Így nem programonként
-        kódolunk — a profil igazodik az importálóhoz.
+        elválasztója, tizedesjele, dátumformátuma és kódolása.
       </p>
 
       <ExportPanel

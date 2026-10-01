@@ -4,8 +4,9 @@ import { Nav } from "@/components/Nav";
 import { InviteAcceptor } from "@/components/InviteAcceptor";
 
 export const metadata: Metadata = {
-  title: "Számlafeldolgozó",
-  description: "Vállalkozó + könyvelő + NAV egy helyen.",
+  title: "Aurum — Számlafeldolgozó",
+  description:
+    "Vállalkozó, könyvelő és a NAV Online Számla egy helyen. Számlák lekérdezése, papírszámlák AI-kiolvasása, export bármelyik könyvelőprogramhoz.",
 };
 
 export default function RootLayout({

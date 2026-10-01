@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { getCompanies, getUser } from "@/lib/auth";
 import { UploadPanel } from "./UploadPanel";
 
+// Futásidőben példányosítjuk a Supabase-klienst — lásd az export oldalt.
+export const dynamic = "force-dynamic";
+
 export default async function Feltoltes() {
   const user = await getUser();
   if (!user) redirect("/bejelentkezes");
