@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { extractInvoiceFromDocument, type ExtractedInvoice } from "@/lib/ai/extract";
+import { extractInvoiceFromDocument } from "@/lib/ai/extract";
+import type { ExtractedInvoice } from "@/lib/ai/types";
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB — a Supabase Storage és az AI is elviszi
 const ACCEPTED = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
@@ -62,7 +63,7 @@ export function UploadPanel({
     try {
       // 1) Fájl a Storage-ba: <company_id>/<véletlen>-<fájlnév>
       const safeName = file.name.replace(/[^\w.\-]+/g, "_");
-      const path = `${companyId}/${crypto.randomUUID()}-${safeName}`;
+      const path = companyId + "/" + crypto.randomUUID() + "-" + safeName;
 
       const { error: upError } = await supabase.storage
         .from("invoice-files")
@@ -94,7 +95,7 @@ export function UploadPanel({
       setWarnings(res.warnings);
 
       // 3) Mentés a számlák közé, a fájl útvonalával.
-      const { data: saved, error: insertError } = await supabase
+      const { data: savedRow, error: insertError } = await supabase
         .from("invoices")
         .insert({
           company_id: companyId,
@@ -116,7 +117,7 @@ export function UploadPanel({
         .select("id")
         .single();
 
-      if (insertError || !saved) {
+      if (insertError || !savedRow) {
         setError(
           "A fájl felkerült és az adatok kiolvasódtak, de a mentés nem sikerült: " +
             (insertError?.message ?? "")
