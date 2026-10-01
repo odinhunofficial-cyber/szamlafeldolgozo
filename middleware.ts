@@ -4,6 +4,12 @@ import { NextResponse, type NextRequest } from "next/server";
 // A Supabase session frissítése minden kérésnél, és a védett útvonalak őrzése.
 const PROTECTED_PREFIXES = ["/cegek", "/szamlak", "/export", "/feltoltes"];
 
+interface CookieToSet {
+  name: string;
+  value: string;
+  options?: Record<string, unknown>;
+}
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -15,7 +21,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieToSet[]) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
