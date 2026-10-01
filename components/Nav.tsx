@@ -4,16 +4,16 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Logo } from "./Logo";
 
-// A logó: AURUM, ritkított nagybetűvel, arany ponttal — a Nav-ban a .brand osztály adja.
+// A logó: AURUM, ritkított nagybetűvel, arany ponttal.
 export function Nav() {
   const [email, setEmail] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Ha az env-változók hiányoznak, a kliens létrehozása hibát dobna —
-    // ilyenkor a fejléc a bejelentkezés nélküli állapotot mutatja.
+    // Ha az env-változók hiányoznak, a kliens létrehozása hibát dobna.
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
       setReady(true);
       return;
@@ -44,6 +44,7 @@ export function Nav() {
     <nav className="topbar">
       <div className="inner">
         <Link href="/" className="brand">
+          <Logo size={22} />
           Aurum
         </Link>
 
