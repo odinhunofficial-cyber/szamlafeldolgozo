@@ -9,15 +9,9 @@ const TabCtx = createContext<{
 
 export function NavTabs({ children }: { children: React.ReactNode }) {
   const [value, setValue] = useState("szamlak");
-
   return (
     <TabCtx.Provider value={{ value, setValue }}>
-      <div
-        className="row"
-        style={{ gap: 8, marginTop: 18, flexWrap: "nowrap" }}
-      >
-        {children}
-      </div>
+      <div className="tabs">{children}</div>
     </TabCtx.Provider>
   );
 }
@@ -25,12 +19,10 @@ export function NavTabs({ children }: { children: React.ReactNode }) {
 export function NavTab({ value, label }: { value: string; label: string }) {
   const ctx = useContext(TabCtx);
   const active = ctx.value === value;
-
   return (
     <button
       type="button"
-      className={active ? "" : "secondary"}
-      style={{ flex: "0 0 auto" }}
+      className={active ? "tab on" : "tab"}
       onClick={() => ctx.setValue(value)}
     >
       {label}

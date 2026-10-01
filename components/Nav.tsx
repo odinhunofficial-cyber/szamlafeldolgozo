@@ -6,14 +6,12 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "./Logo";
 
-// A logó: AURUM, ritkított nagybetűvel, arany ponttal.
 export function Nav() {
   const [email, setEmail] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Ha az env-változók hiányoznak, a kliens létrehozása hibát dobna.
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
       setReady(true);
       return;
@@ -43,15 +41,14 @@ export function Nav() {
   return (
     <nav className="topbar">
       <div className="inner">
-        <Link href="/" className="brand">
-          <Logo size={22} />
-          Aurum
-        </Link>
+        <Link href="/" className="brand"><Logo size={21} />Aurum</Link>
 
         {email && (
           <>
             <Link href="/cegek">Cégek</Link>
             <Link href="/feltoltes">Feltöltés</Link>
+            <Link href="/inbox">Postafiók</Link>
+            <Link href="/megnyitas">Kimutatások</Link>
             <Link href="/export">Export</Link>
           </>
         )}
@@ -61,9 +58,7 @@ export function Nav() {
         {ready && email ? (
           <>
             <span className="small muted">{email}</span>
-            <button className="secondary" onClick={signOut}>
-              Kijelentkezés
-            </button>
+            <button className="secondary" onClick={signOut}>Kijelentkezés</button>
           </>
         ) : (
           ready && (
