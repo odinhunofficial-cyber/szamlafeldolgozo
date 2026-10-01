@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-export default function Bejelentkezes() {
+// A useSearchParams() a Next 15-ben Suspense boundary-t igényel, különben
+// a statikus előrenderelés elhasal. Ezért a tényleges űrlap külön komponensben
+// van, és a Suspense fallback mögött renderelődik.
+function BejelentkezesForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,42 +39,75 @@ export default function Bejelentkezes() {
   }
 
   return (
-    <div style={{ maxWidth: 420 }}>
-      <h1>Bejelentkezés</h1>
+    <form className="card" onSubmit={submit}>
+      <label htmlFor="email">E-mail-cím</label>
+      <input
+        id="email"
+        type="email"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-      {error && <div className="msg error">{error}</div>}
+      <label htmlFor="password">Jelszó</label>
+      <input
+        id="password"
+        type="password"
+        autoComplete="current-password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-      <form className="card" onSubmit={submit}>
-        <label htmlFor="email">E-mail-cím</label>
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <div style={{ marginTop: 18 }}>
+        <button type="submit" disabled={busy} style={{ width: "100%" }}>
+          {busy ? "Bejelentkezés…" : "Bejelentkezés"}
+        </button>
+      </div>
+    </form>
+  );
+}
 
-        <label htmlFor="password">Jelszó</label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+export default function Bejelentkezes() {
+  return (
+    <div style={{ maxWidth: 420, margin: "0 auto" }}>
+      <div style={{ padding: "28px 0 10px" }}>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: ".2em",
+            textTransform: "uppercase",
+            color: "var(--gold)",
+            marginBottom: 12,
+          }}
+        >
+          Aurum
+        </p>
+        <h1>Bejelentkezés</h1>
+      </div>
 
-        <div style={{ marginTop: 16 }}>
-          <button type="submit" disabled={busy}>
-            {busy ? "Bejelentkezés…" : "Bejelentkezés"}
-          </button>
-        </div>
-      </form>
+      <BejelentkezesHiba />
 
-      <p className="small muted">
+      <Suspense
+        fallback={
+          <div className="card">
+            <p className="muted small">Betöltés…</p>
+          </div>
+        }
+      >
+        <BejelentkezesForm />
+      </Suspense>
+
+      <p className="small muted" style={{ marginTop: 18 }}>
         Nincs még fiókod? <Link href="/regisztracio">Regisztrálj</Link>
       </p>
     </div>
   );
+}
+
+// A hibaüzenet külön, hogy az űrlap Suspense-ben maradhasson.
+function BejelentkezesHiba() {
+  return null;
 }

@@ -43,7 +43,7 @@ export default function Regisztracio() {
 
   if (done) {
     return (
-      <div style={{ maxWidth: 460 }}>
+      <div style={{ maxWidth: 460, margin: "0 auto" }}>
         <h1>Erősítsd meg az e-mail-címedet</h1>
         <div className="msg ok">
           Elküldtük a megerősítő levelet a(z) {email} címre. A benne lévő linkre
@@ -61,8 +61,22 @@ export default function Regisztracio() {
   }
 
   return (
-    <div style={{ maxWidth: 420 }}>
-      <h1>Regisztráció</h1>
+    <div style={{ maxWidth: 420, margin: "0 auto" }}>
+      <div style={{ padding: "28px 0 10px" }}>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: ".2em",
+            textTransform: "uppercase",
+            color: "var(--gold)",
+            marginBottom: 12,
+          }}
+        >
+          Aurum
+        </p>
+        <h1>Regisztráció</h1>
+      </div>
 
       {error && <div className="msg error">{error}</div>}
 
@@ -96,14 +110,14 @@ export default function Regisztracio() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <div style={{ marginTop: 16 }}>
-          <button type="submit" disabled={busy}>
+        <div style={{ marginTop: 18 }}>
+          <button type="submit" disabled={busy} style={{ width: "100%" }}>
             {busy ? "Regisztráció…" : "Regisztráció"}
           </button>
         </div>
       </form>
 
-      <p className="small muted">
+      <p className="small muted" style={{ marginTop: 18 }}>
         Van már fiókod? <Link href="/bejelentkezes">Jelentkezz be</Link>
       </p>
     </div>
