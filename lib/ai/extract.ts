@@ -1,28 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-
-export interface ExtractedInvoice {
-  invoiceNumber: string | null;
-  issueDate: string | null;
-  supplierName: string | null;
-  supplierTaxNumber: string | null;
-  customerName: string | null;
-  customerTaxNumber: string | null;
-  netAmount: number | null;
-  vatAmount: number | null;
-  grossAmount: number | null;
-  currency: string | null;
-  category: string | null;
-  direction: "incoming" | "outgoing";
-}
-
-export interface ExtractResult {
-  ok: boolean;
-  error: string;
-  invoice: ExtractedInvoice;
-  warnings: string[];
-}
+import type { ExtractedInvoice, ExtractResult } from "./types";
 
 const EMPTY: ExtractedInvoice = {
   invoiceNumber: null,
@@ -66,6 +45,42 @@ const SYSTEM_PROMPT = [
   "- Ha egy mező nem olvasható biztosan, null legyen — NE találj ki értéket.",
   '- A confidence akkor "low", ha a dokumentum életlen, hiányos vagy kézzel írott.',
 ].join("\n");
+
+function str(v: unknown): string | null {
+  if (v === null || v === undefined) return null;
+  const s = String(v).trim();
+  return s === "" ? null : s;
+}
+
+function num(v: unknown): number | null {
+  if (v === null || v === undefined || v === "") return null;
+  const n =
+    typeof v === "number"
+      ? v
+      : Number(String(v).replace(/\s/g, "").replace(",", "."));
+  return Number.isFinite(n) ? n : null;
+}
+
+function isoDate(v: unknown): string | null {
+  const s = str(v);
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})/);
+  if (m) {
+    return m[1] + "-" + m[2].padStart(2, "0") + "-" + m[3].padStart(2, "0");
+  }
+  return null;
+}
+
+function taxNumber(v: unknown): string | null {
+  const s = str(v);
+  if (!s) return null;
+  const digits = s.replace(/[^0-9]/g, "");
+  if (digits.length === 11) {
+    return digits.slice(0, 8) + "-" + digits[8] + "-" + digits.slice(9);
+  }
+  return s;
+}
 
 export async function extractInvoiceFromDocument(input: {
   companyId: string;
@@ -161,7 +176,10 @@ export async function extractInvoiceFromDocument(input: {
     return fail("Az AI-hívás nem sikerült: " + (e?.message ?? String(e)));
   }
 
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
+  const cleaned = raw
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```\s*$/, "")
+    .trim();
 
   let parsed: any;
   try {
@@ -236,40 +254,4 @@ export async function extractInvoiceFromDocument(input: {
   }
 
   return { ok: true, error: "", invoice, warnings };
-}
-
-function str(v: unknown): string | null {
-  if (v === null || v === undefined) return null;
-  const s = String(v).trim();
-  return s === "" ? null : s;
-}
-
-function num(v: unknown): number | null {
-  if (v === null || v === undefined || v === "") return null;
-  const n =
-    typeof v === "number"
-      ? v
-      : Number(String(v).replace(/\s/g, "").replace(",", "."));
-  return Number.isFinite(n) ? n : null;
-}
-
-function isoDate(v: unknown): string | null {
-  const s = str(v);
-  if (!s) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-  const m = s.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})/);
-  if (m) {
-    return m[1] + "-" + m[2].padStart(2, "0") + "-" + m[3].padStart(2, "0");
-  }
-  return null;
-}
-
-function taxNumber(v: unknown): string | null {
-  const s = str(v);
-  if (!s) return null;
-  const digits = s.replace(/[^0-9]/g, "");
-  if (digits.length === 11) {
-    return digits.slice(0, 8) + "-" + digits[8] + "-" + digits.slice(9);
-  }
-  return s;
 }

@@ -1,4 +1,5 @@
-// A NAV Online Számla 3.0 kérések/válaszok minimális típusai.
+// A NAV Online Számla 3.0 kérések/válaszok típusai és konstansai.
+// Szándékosan direktíva nélkül: kliens- és szerveroldalról egyaránt importálható.
 
 export interface NavUser {
   login: string;

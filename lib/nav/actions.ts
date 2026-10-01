@@ -3,7 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { decrypt } from "@/lib/crypto";
-import { queryInvoiceDigest, NavError } from "./client";
+import { queryInvoiceDigest, NavError } from "./digest";
+import type { NavEnvironment } from "./types";
 
 export interface NavQueryResult {
   ok: boolean;
@@ -12,13 +13,12 @@ export interface NavQueryResult {
   inserted: number;
 }
 
-// A NAV-lekérdezéshez szükséges, hogy az időszakot ne lehessen korlátlanul tágítani.
 const MAX_DAYS = 35;
 
 function daysBetween(from: string, to: string): number {
   const a = Date.parse(from + "T00:00:00Z");
   const b = Date.parse(to + "T00:00:00Z");
-  return Math.round((b - a) / 86_400_000);
+  return Math.round((b - a) / 86400000);
 }
 
 function looksLikeIsoDate(s: string): boolean {
@@ -49,7 +49,8 @@ export async function queryNav(input: {
   }
   if (days > MAX_DAYS) {
     return fail(
-      `Túl hosszú időszak (${days} nap). A NAV-lekérdezéshez legfeljebb ${MAX_DAYS} nap adható meg egyszerre — próbáld 30 napos szakaszokban.`
+      "Túl hosszú időszak (" + days + " nap). A NAV-lekérdezéshez legfeljebb " +
+        MAX_DAYS + " nap adható meg egyszerre — próbáld 30 napos szakaszokban."
     );
   }
 
@@ -84,8 +85,12 @@ export async function queryNav(input: {
     .eq("company_id", companyId)
     .maybeSingle();
 
-  if (credError) return fail("A NAV-adatok olvasása nem sikerült: " + credError.message);
-  if (!creds) return fail("Ehhez a céghez még nincs NAV technikai felhasználó megadva.");
+  if (credError) {
+    return fail("A NAV-adatok olvasása nem sikerült: " + credError.message);
+  }
+  if (!creds) {
+    return fail("Ehhez a céghez még nincs NAV technikai felhasználó megadva.");
+  }
 
   let navUser;
   try {
@@ -93,8 +98,12 @@ export async function queryNav(input: {
       login: decrypt(creds.login_enc),
       password: decrypt(creds.password_enc),
       taxNumber: creds.tax_number_enc ? decrypt(creds.tax_number_enc) : "",
-      signatureKey: creds.signature_key_enc ? decrypt(creds.signature_key_enc) : undefined,
-      exchangeKey: creds.exchange_key_enc ? decrypt(creds.exchange_key_enc) : undefined,
+      signatureKey: creds.signature_key_enc
+        ? decrypt(creds.signature_key_enc)
+        : undefined,
+      exchangeKey: creds.exchange_key_enc
+        ? decrypt(creds.exchange_key_enc)
+        : undefined,
     };
   } catch (e: any) {
     return fail(
@@ -111,7 +120,7 @@ export async function queryNav(input: {
   let invoices;
   try {
     invoices = await queryInvoiceDigest({
-      environment: (creds.environment as "test" | "prod") ?? "test",
+      environment: (creds.environment as NavEnvironment) ?? "test",
       user: navUser,
       from,
       to,
