@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import { Logo } from "@/components/Logo";
 
-// A Next 15-ben a favicon-t külön fájl adja; ide csak a metaadatok kerülnek.
-// A logó SVG-ként a components/Logo.tsx-ben él.
-export const metadata: Metadata = {
+// A stab favicon a public/favicon.svg-ből jön.
+export const metadata = {
   title: "Aurum — Számlafeldolgozó",
   description: "NAV, papírszámla és könyvelői export egy helyen.",
 };
+
+export default function Home() {
+  return null;
+}
