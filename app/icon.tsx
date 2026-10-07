@@ -1,7 +1,6 @@
 import { ImageResponse } from "next/og";
 
 // Az AURUM favicon: fekete négyzet, ezüst A, arany lezáró vonal.
-// A fájlnév (app/icon.tsx) a Next favicon-konvenciója, ezért Response-t kell adni.
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
@@ -15,13 +14,13 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0A0A0B",
+          background: "#08080A",
           position: "relative",
         }}
       >
         <div
           style={{
-            color: "#E8E8EA",
+            color: "#ECECED",
             fontSize: 22,
             fontWeight: 600,
             letterSpacing: -1,
